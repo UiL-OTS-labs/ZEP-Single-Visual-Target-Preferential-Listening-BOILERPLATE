@@ -1,0 +1,304 @@
+/******************************************************************************\
+FILE:           preflisten_tobii.zp
+AUTHOR:         Theo Veenker (UiL-OTS) <T.J.G.Veenker@uu.nl>
+ADAPTED BY:     -
+
+EXPERIMENT:     Single Visual Target Preferential Listening (using eye-tracking)
+
+DESCRIPTION:
+
+Purpose of this experiment is to detect whether an infant participant
+has a preference for one particular type of sound (word, intonation, 
+accent, language etc) over another. The infant sits on the caregiver's 
+lap facing a computer monitor on which visual stimuli will be presented.
+Auditory stimuli will be presented through a speaker. The infants 
+eye-movements will be followed by an eye-tracker. The procedure 
+consists of a short familiarization phase, and a test phase. The trial 
+structure is the same for both phases: first an audio-visual attention 
+getter is presented. Then a visual stimulus is presented together with 
+an auditory stimulus. The auditory stimulus consists of a sequence of 
+sounds (words) of a particular type. For each in the test phase trial 
+the accumulated time the child looks at the visual stimulus is measured.
+If the infant looks away too long during the test phase, the trial is 
+aborted. Output: looking time.
+
+
+Global structure of experiment:
+
+  - welcome
+
+  - eye-tracker calibration
+
+  - familiarization phase (1 trial)
+      trial
+
+  - test phase (N trials)
+      trial
+
+  - thankyou
+
+
+HISTORY:
+2012-11-10 TV   Created. Same as EyeLink version without EyeLink specifics.
+
+\******************************************************************************/
+
+requires 1.0;
+
+import std_windows1;
+import std_texts_en;
+import std_entry_page2;
+import std_exit_page2;
+import std_pause_page;
+import std_blank_page;
+import std_etcal_page;
+import std_sound_output_device;
+import std_sound_playback;
+
+import eyetracker_tobii3;
+import test_page;
+
+
+Experiment experiment
+{
+    on_event:entry()
+    {
+        show_test_windows();
+    }
+
+
+    on_event:message()
+    {
+        // On Ctrl+F4 jump unconditionally to thankyou phase.
+        if (message_sender == control && message_arg == SYS_STOP)
+        {
+            control.mark_experiment_aborted();
+            thankyou.enter();
+        }
+    }
+
+
+    Part welcome
+    {
+        on_event:entry()
+        {
+            entry_page.add_image(stimuli_dir() + "images/bal.png");
+            entry_page.action(this);
+        }
+    }
+
+
+    Part calibration
+    {
+        on_event:entry()
+        {
+            etcal_page.action(this);
+        }
+    }
+
+
+    Block familiarization
+    {
+        TestItem        item;   // current item
+
+
+        on_event:entry()
+        {
+            num_cycles = fam_items.size;
+
+            // Let eye-tracker open a data file. On the tracker system the
+            // file will be called <s>_<n>.edf where <s> is the passed session 
+            // id and <n> a system created file number (starts at 1).
+//            eyetracker.open_data_file(expdb.experiment.id, expdb.researcher.id, 
+//                expdb.participant.id, expdb.experiment.session.id, 0);
+//            eyetracker.print_to_data_file("Preferential Listening Experiment");
+
+            // Prepare test page.
+            test_page.setup();
+        }
+
+
+        on_event:exit()
+        {
+            test_page.cleanup();
+
+            eyetracker.abort();
+//            eyetracker.close_data_file();
+        }
+
+
+        Trial trial
+        {
+            on_event:entry()
+            {
+                item = fam_items[familiarization.cycle];
+
+                // Add begin of trial message to eye-tracker data file for
+                // analysis with the Fixation tool (Cozijn 1994).
+//                eyetracker.print_to_data_file("trialbeg " +
+//                    string(item.number) + " " +
+//                    string(familiarization.cycle + 1) + " " +
+//                    string(item.number) + " " +
+//                    string(item.type));
+//                eyetracker.print_to_data_file("plafile " +
+//                    string(item.type) + 
+//                    string(item.number) + ".bmp");
+
+                // Show information on eye-tracker screen.
+//                eyetracker.send_command("record_status_message "
+//                    "'Familiarization trial " + string(familiarization.cycle+1) + "'");
+
+                // Start trial.
+                test_page.action(this, item, reference_time, 
+                    familiarization.cycle);
+            }
+
+
+            on_event:exit()
+            {
+                // Add end of trial message.
+//                eyetracker.print_to_data_file("trialend " +
+//                    string(item.number) + " " +
+//                    string(familiarization.cycle + 1) + " " +
+//                    string(item.number) + " " +
+//                    string(item.type));
+
+                // Clear eye-tracker status line.
+//                eyetracker.send_command("record_status_message ''");
+            }
+        }
+    }
+
+
+    Block test
+    {
+        TestItem        item;   // current item
+        TestOutput      output; // current output table row
+
+
+        on_event:entry()
+        {
+            // Randomize test items table.
+//            if (shuffle_test_items() != OK) terminate;
+
+            num_cycles = test_items.size;
+//            num_cycles = 3;
+
+            // Let eye-tracker open a data file. On the tracker system the
+            // file will be called <s>_<n>.edf where <s> is the passed session 
+            // id and <n> a system created file number (starts at 1).
+//            eyetracker.open_data_file(expdb.experiment.id, expdb.researcher.id, 
+//                expdb.participant.id, expdb.experiment.session.id, 1);
+//            eyetracker.print_to_data_file("Preferential Listening Experiment");
+
+            // Prepare test page.
+            test_page.setup();
+        }
+
+
+        on_event:exit()
+        {
+            test_page.cleanup();
+
+            eyetracker.abort();
+//            eyetracker.close_data_file();
+
+            // Save test phase output table as CSV file.
+            test_output_save();
+        }
+
+
+        Trial trial
+        {
+            on_event:entry()
+            {
+                item = test_items[selected_group][test.cycle];
+
+                // Add begin of trial message to eye-tracker data file for
+                // analysis with the Fixation tool (Cozijn 1994).
+//                eyetracker.print_to_data_file("trialbeg " +
+//                    string(item.number) + " " +
+//                    string(test.cycle + 1) + " " +
+//                    string(item.number) + " " +
+//                    string(item.type));
+//                eyetracker.print_to_data_file("plafile " +
+//                    string(item.type) + 
+//                    string(item.number) + ".bmp");
+
+                // Show information on eye-tracker screen.
+//                eyetracker.send_command("record_status_message "
+//                    "'Test trial " + string(test.cycle+1) + "'");
+
+                // Start trial.
+                test_page.action(this, item, reference_time, test.cycle);
+            }
+
+
+            on_event:exit()
+            {
+                // Add new row to test output table.
+                TestOutput output;
+                output.trialnum = test.cycle + 1;
+                output.number = item.number;
+                output.type = item.type;
+                output.cumlt = int(test_page.response.cumlt);
+                output.cumnlt = int(test_page.response.cumnlt);
+                output.lookedaway = test_page.response.lookedaway;
+                test_output_append(output);
+
+                // Add end of trial message.
+//                eyetracker.print_to_data_file("trialend " +
+//                    string(item.number) + " " +
+//                    string(test.cycle + 1) + " " +
+//                    string(item.number) + " " +
+//                    string(item.type));
+
+                // Clear eye-tracker status line.
+//                eyetracker.send_command("record_status_message ''");
+            }
+        }
+    }
+
+
+    Part
+    {
+        on_event:entry()
+        {
+            blank_page.action_auto(this, 500ms, 500ms);
+        }
+    }
+
+
+    Part thankyou
+    {
+        int     sesid;
+
+
+        on_event:entry()
+        {
+            sesid = expdb.experiment.session.id;
+
+            control.end_experiment();   // Check-in session.
+
+            exit_page.add_image(stimuli_dir() + "images/giraf.png");
+            exit_page.add_image(stimuli_dir() + "images/kikker.png");
+            exit_page.add_image(stimuli_dir() + "images/kip.png");
+            exit_page.add_image(stimuli_dir() + "images/koe.png");
+            exit_page.add_image(stimuli_dir() + "images/konijn.png");
+            exit_page.add_image(stimuli_dir() + "images/pinguin.png");
+            exit_page.add_image(stimuli_dir() + "images/vlinder.png");
+            exit_page.add_image(stimuli_dir() + "images/zebra.png");
+            exit_page.action(this, 60s);
+            sound_playback.playback.set_scaling(1.0);
+            sound_playback.play(stimuli_dir() + "sounds/handjes.wav", 
+                now() + 1000ms);
+        }
+
+
+        on_event:exit()
+        {
+            // We're closing. Retrieve EDFs recorded in this session.
+//            eyetracker.retrieve_all_data_files(sesid);
+        }
+    }
+}

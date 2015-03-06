@@ -1,0 +1,49 @@
+/******************************************************************************\
+FILE:           random.zm
+AUTHOR:         Theo Veenker (UiL-OTS) <T.J.G.Veenker@uu.nl>
+ADAPTED BY:     Martijn van der Klis (UiL-OTS) <M.H.vanderKlis@uu.nl>
+
+DESCRIPTION:
+
+Item table randomization functions.
+
+
+HISTORY:
+2012-11-10 TV   Created.
+2013-07-02 MvdK Added randomization for familiarization items.
+
+\******************************************************************************/
+
+
+// Shuffles fam_items table (restriction: don't put the same lists after each other). 
+int shuffle_fam_items()
+{
+    fam_items[selected_group].shuffle(0, -1);
+    
+    while (!check_randomization()) {
+        fam_items[selected_group].shuffle(0, -1);
+    }
+
+    return OK;
+}
+
+
+bool check_randomization() 
+{
+    int i = 0;
+    while (i < fam_items[selected_group].size - 1) {
+        if (fam_items[selected_group][i].sndfn == fam_items[selected_group][++i].sndfn) return false; 
+    }
+
+    return true;
+}
+
+
+// Shuffles test_items table (no restrictions on item order).
+int shuffle_test_items()
+{
+    test_items[selected_group].shuffle(0, -1);
+
+    return OK;
+}
+
