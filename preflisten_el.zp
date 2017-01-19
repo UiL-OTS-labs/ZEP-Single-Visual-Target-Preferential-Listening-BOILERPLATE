@@ -45,7 +45,7 @@ HISTORY:
 
 \******************************************************************************/
 
-requires 1.0;
+requires 1.14;
 
 import std_windows1;
 import std_texts_en;
@@ -111,11 +111,26 @@ Experiment experiment
 
             num_cycles = fam_items[selected_group].size;
 
+            int listnum = selected_group + 1;
+            int recordingnum = 1;
+
+            string edfname =   
+                    format(expdb.experiment.session.id, 4) + "_" + 
+                    format(listnum, 2) + "_" + 
+                    format(recordingnum, 2);
+
             // Let eye-tracker open a data file. On the tracker system the
             // file will be called <s>_<n>.edf where <s> is the passed session 
             // id and <n> a system created file number (starts at 1).
-            eyetracker.open_data_file(expdb.experiment.id, expdb.researcher.id, 
-                expdb.participant.id, expdb.experiment.session.id, 0);
+            eyetracker.open_data_file(
+                    edfname,
+                    expdb.experiment.id,
+                    expdb.researcher.id, 
+                    expdb.participant.id,
+                    expdb.experiment.session.id,
+                    listnum, 
+                    recordingnum
+                    );
             eyetracker.print_to_data_file("Preferential Listening Experiment");
 
             // Prepare test page.
@@ -187,11 +202,26 @@ Experiment experiment
 
             num_cycles = test_items[selected_group].size;
 
+            int listnum = selected_group + 1;
+            int recordingnum = 2;
+
+            string edfname =   
+                    format(expdb.experiment.session.id, 4) + "_" + 
+                    format(listnum, 2) + "_" + 
+                    format(recordingnum, 2);
+
             // Let eye-tracker open a data file. On the tracker system the
             // file will be called <s>_<n>.edf where <s> is the passed session 
             // id and <n> a system created file number (starts at 1).
-            eyetracker.open_data_file(expdb.experiment.id, expdb.researcher.id, 
-                expdb.participant.id, expdb.experiment.session.id, 1);
+            eyetracker.open_data_file(
+                    edfname,
+                    expdb.experiment.id,
+                    expdb.researcher.id, 
+                    expdb.participant.id,
+                    expdb.experiment.session.id,
+                    listnum, 
+                    recordingnum
+                    );
             eyetracker.print_to_data_file("Preferential Listening Experiment");
 
             // Prepare test page.
@@ -301,7 +331,7 @@ Experiment experiment
         on_event:exit()
         {
             // We're closing. Retrieve EDFs recorded in this session.
-            eyetracker.retrieve_all_data_files(sesid);
+            eyetracker.retrieve_data_files();
         }
     }
 }

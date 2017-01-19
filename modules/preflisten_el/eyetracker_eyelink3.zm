@@ -72,6 +72,19 @@ EyeLinkEyeTracker eyetracker
         //   0: cognitive configuration (standard sensitivity)
         //   1: pursuit and neurological configuration
 //      analyzer_configuration          = 0;
+        
+        // Desired eye-movement data file format:
+        //   NONE:   no eye-movement data saved
+        //   SYSTEM: eye-tracker defined format (preferred)
+        //   ZEP:    zep defined format
+        //   BOTH:   both eye-tracker and zep defined format
+        data_file_format                = EYE_FILE_FORMAT_SYSTEM;
+
+        // Where to store eye-movement data files.
+        data_file_output_dir            = data_dir() + script_name() + "/dat/";
+
+        if (!file_exists(data_file_output_dir))
+            create_dir_tree(data_file_output_dir);
 
         // Fixation update interval.
 //      fixation_update_interval        = 50ms;
@@ -306,20 +319,20 @@ EyeLinkEyeTracker eyetracker
     }
 
 
-    void retrieve_all_data_files(int sesid)
-    {
-        // Create folder for retrieved eye-tracking data files.
-        string dir = data_dir() + script_name() + "/edf/";
-        if (!file_exists(dir)) create_dir_tree(dir);
-
-        // Retrieve eye-tracker data files.
-        // Format: data/<expname>/edf/<s>_<n>.edf where <s> is the session 
-        // id, and <n> is a system created file number (starts at 1).
-        int n = 1;
-        while (n <= num_data_files_created)
-        {
-            retrieve_data_file(sesid, n, dir);
-            n++;
-        }
-    }
+//    void retrieve_all_data_files(int sesid)
+//    {
+//        // Create folder for retrieved eye-tracking data files.
+//        string dir = data_dir() + script_name() + "/edf/";
+//        if (!file_exists(dir)) create_dir_tree(dir);
+//
+//        // Retrieve eye-tracker data files.
+//        // Format: data/<expname>/edf/<s>_<n>.edf where <s> is the session 
+//        // id, and <n> is a system created file number (starts at 1).
+//        int n = 1;
+//        while (n <= num_data_files_created)
+//        {
+//            retrieve_data_file(sesid, n, dir);
+//            n++;
+//        }
+//    }
 }
