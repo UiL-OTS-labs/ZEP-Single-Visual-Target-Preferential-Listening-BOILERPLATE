@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 
 # Define required Zep version:
-ZEP_VER=1.14
+ZEP_VER=1.12
 
 # Iff installed at nonstandard location, define installation location here:
 #ZEP_DIR=/opt/zep
@@ -62,6 +62,9 @@ if [ ! "$DONE" ]; then
 	echo "to"
 	echo "   ZEP_DIR=/home/john/mystuff/zep"
 	echo "and try again."
+	echo ""
+	echo "Hit <Enter> to coninue."
+	read x
 	exit
 fi
 

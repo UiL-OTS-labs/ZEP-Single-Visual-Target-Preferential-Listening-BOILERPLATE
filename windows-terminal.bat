@@ -11,7 +11,7 @@ rem set ZEP_DIR=C:\zep
 rem ----------------------------------------------------------------------------
 
 title Zep Console Window
-color 70
+color F0
 mode 100,40
 
 if "%ZEP_DIR%" == "" goto SKIP1
@@ -28,6 +28,11 @@ if exist "%ZEP_DIR%\%ZEP_VER%\bin\zep.exe" goto SET_PATH
 set ZEP_DIR=%PROGRAMFILES%\zep
 if exist "%ZEP_DIR%\%ZEP_VER%\bin\zep.exe" goto SET_PATH
 
+if not exist "%PROGRAMFILES(x86)%" goto SKIP2
+set ZEP_DIR=%PROGRAMFILES(x86)%\zep
+if exist "%ZEP_DIR%\%ZEP_VER%\bin\zep.exe" goto SET_PATH
+:SKIP2
+
 set ZEP_DIR=%ALLUSERSPROFILE%\zep
 if exist "%ZEP_DIR%\%ZEP_VER%\bin\zep.exe" goto SET_PATH
 
@@ -35,22 +40,25 @@ set ZEP_DIR=
 
 echo.
 echo Unable to locate Zep %ZEP_VER% on your system. Tested following folders:
-if "%INITIAL_ZEP_DIR%" == "" goto SKIP2
+if "%INITIAL_ZEP_DIR%" == "" goto SKIP3
 echo   %INITIAL_ZEP_DIR%\
-:SKIP2
-echo   %HOMEDRIVE%%HOMEPATH%\zep\
-if "%USERPROFILE%" == "%HOMEDRIVE%%HOMEPATH%" goto SKIP3
-echo   %USERPROFILE%\zep\
 :SKIP3
+echo   %HOMEDRIVE%%HOMEPATH%\zep\
+if "%USERPROFILE%" == "%HOMEDRIVE%%HOMEPATH%" goto SKIP4
+echo   %USERPROFILE%\zep\
+:SKIP4
 echo   %PROGRAMFILES%\zep\
+if not exist "%PROGRAMFILES(x86)%" goto SKIP5
+echo   %PROGRAMFILES(x86)%\zep\
+:SKIP5
 echo   %ALLUSERSPROFILE%\zep\
 echo.
 echo Please install Zep %ZEP_VER% to any of these locations or, in case you
 echo already have installed it (or want to install it) at a different
-echo location, then define the installation location in start-console.bat.
+echo location, then define the installation location in windows-terminal.bat.
 echo.
 echo For example if you have installed Zep %ZEP_VER% at C:\MyStuff\zep, then
-echo edit start-console.bat and change this line:
+echo edit windows-terminal.bat and change this line:
 echo   rem set ZEP_DIR=C:\zep
 echo to
 echo   set ZEP_DIR=C:\MyStuff\zep
